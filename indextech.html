@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusReclaim | Lost & Found</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
+        .glass-effect { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Loader */
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <nav class="fixed w-full z-50 glass-effect border-b border-gray-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <div class="bg-blue-600 text-white p-2 rounded-lg"><i class="fa-solid fa-layer-group"></i></div>
+                    <span class="font-bold text-xl tracking-tight text-blue-900">CampusReclaim</span>
+                </div>
+                <button id="authBtn" class="bg-gray-900 text-white px-5 py-2 rounded-full font-medium hover:bg-gray-800 transition shadow-lg">
+                    Log In with Google
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <header class="pt-32 pb-20 px-4 text-center bg-white relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-blue-50 to-white -z-10"></div>
+        <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 mb-6">Lost something? <br><span class="text-blue-600">Let's get it back.</span></h1>
+        
+        <div class="flex flex-col sm:flex-row justify-center gap-4 mt-10">
+            <button onclick="openModal('lost')" class="px-8 py-4 bg-orange-500 text-white rounded-xl font-bold shadow-lg hover:bg-orange-600 hover:scale-105 transition transform flex items-center justify-center gap-2">
+                <i class="fa-solid fa-circle-exclamation"></i> I Lost Something
+            </button>
+            <button onclick="openModal('found')" class="px-8 py-4 bg-emerald-500 text-white rounded-xl font-bold shadow-lg hover:bg-emerald-600 hover:scale-105 transition transform flex items-center justify-center gap-2">
+                <i class="fa-solid fa-hand-holding-heart"></i> I Found Something
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-12">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div class="flex bg-white p-1 rounded-lg shadow-sm border border-gray-200">
+                <button onclick="filterItems('all')" class="px-4 py-2 rounded-md bg-gray-100 font-medium text-gray-700 hover:bg-gray-200 transition">All</button>
+                <button onclick="filterItems('lost')" class="px-4 py-2 rounded-md text-gray-500 hover:bg-gray-50 transition">Lost</button>
+                <button onclick="filterItems('found')" class="px-4 py-2 rounded-md text-gray-500 hover:bg-gray-50 transition">Found</button>
+            </div>
+            <div class="relative w-full md:w-96">
+                <i class="fa-solid fa-search absolute left-3 top-3.5 text-gray-400"></i>
+                <input type="text" id="searchInput" onkeyup="searchItems()" placeholder="Search..." class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+            </div>
+        </div>
+        <div id="itemsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </main>
+
+    <div id="submissionModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white w-full max-w-lg rounded-2xl shadow-2xl p-8 fade-in overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="modalTitle" class="text-2xl font-bold text-gray-800">Report Item</h2>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark fa-xl"></i></button>
+            </div>
+            
+            <form id="itemForm" onsubmit="handleFormSubmit(event)">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Item Name</label>
+                        <input type="text" id="itemName" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Your Phone Number</label>
+                        <input type="tel" id="itemPhone" required placeholder="e.g., 9876543210" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                            <select id="itemLocation" class="w-full px-4 py-2 rounded-lg border border-gray-300 outline-none">
+                                <option>Library</option><option>Cafeteria</option><option>Science Block</option><option>Gym</option><option>Main Lawn</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                            <select id="itemCategory" class="w-full px-4 py-2 rounded-lg border border-gray-300 outline-none">
+                                <option value="Electronics">Electronics</option>
+                                <option value="ID Card">ID Card / Wallet</option>
+                                <option value="Clothing">Clothing</option>
+                                <option value="Books">Books</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea id="itemDescription" required rows="3" placeholder="Describe the item (color, brand, any scratches?)..." class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                    </div>
+
+                    <div onclick="document.getElementById('fileInput').click()" class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition group">
+                        <i id="uploadIcon" class="fa-solid fa-camera text-2xl text-gray-400 mb-2 group-hover:text-blue-500 transition"></i>
+                        <p id="uploadText" class="text-sm text-gray-500">Tap to take photo / upload</p>
+                    </div>
+                    <input type="file" id="fileInput" hidden accept="image/*" onchange="previewImage()">
+                    
+                    <button type="submit" id="submitBtn" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition flex justify-center items-center gap-2">
+                        Submit Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // --- YOUR CONFIGURATION ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBMhRjCtM9whpwUSaMzZ917EAvKuH5MaXs",
+            authDomain: "lostandfound-3373f.firebaseapp.com",
+            projectId: "lostandfound-3373f",
+            storageBucket: "lostandfound-3373f.firebasestorage.app",
+            messagingSenderId: "536591585958",
+            appId: "1:536591585958:web:e25453100b2a18872eda67"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const itemsCollection = collection(db, "items");
+        const provider = new GoogleAuthProvider();
+
+        let currentUser = null;
+        let currentFilter = 'all';
+        let compressedImageString = '';
+
+        // --- AUTH LOGIC ---
+        const authBtn = document.getElementById('authBtn');
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                authBtn.textContent = "Log Out";
+                authBtn.onclick = async () => { await signOut(auth); alert("Logged out."); };
+                authBtn.className = "bg-red-600 text-white px-5 py-2 rounded-full font-medium hover:bg-red-700 transition shadow-lg";
+            } else {
+                authBtn.textContent = "Log In with Google";
+                authBtn.onclick = async () => { try { await signInWithPopup(auth, provider); } catch(e) { alert(e.message); } };
+                authBtn.className = "bg-gray-900 text-white px-5 py-2 rounded-full font-medium hover:bg-gray-800 transition shadow-lg";
+            }
+        });
+
+        // --- IMAGE COMPRESSION ---
+        window.previewImage = () => {
+            const file = document.getElementById('fileInput').files[0];
+            if (!file) return;
+            document.getElementById('uploadText').innerText = "Processing image...";
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const maxWidth = 600;
+                    const scaleSize = maxWidth / img.width;
+                    canvas.width = maxWidth;
+                    canvas.height = img.height * scaleSize;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    compressedImageString = canvas.toDataURL('image/jpeg', 0.6);
+                    document.getElementById('uploadText').innerText = "Photo Ready!";
+                    document.getElementById('uploadIcon').className = "fa-solid fa-check-circle text-2xl text-green-500 mb-2";
+                };
+            };
+        };
+
+        // --- RENDER LOGIC ---
+        const grid = document.getElementById('itemsGrid');
+        onSnapshot(query(itemsCollection, orderBy("timestamp", "desc")), (snapshot) => {
+            grid.innerHTML = '';
+            const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            if(items.length === 0) {
+                grid.innerHTML = `<div class="col-span-3 text-center py-20 text-gray-500">No items reported yet.</div>`;
+                return;
+            }
+
+            items.forEach(item => {
+                if (currentFilter !== 'all' && item.type !== currentFilter) return;
+                
+                const imgUrl = item.image && item.image.length > 50 ? item.image : 
+                    (item.category === 'Electronics' ? 'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&q=80&w=300' :
+                     item.category === 'ID Card' ? 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=300' :
+                     'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80&w=300');
+                
+                const badgeColor = item.type === 'lost' ? 'bg-orange-100 text-orange-600' : 'bg-emerald-100 text-emerald-600';
+                
+                // NEW: Logic to display phone if available
+                const phoneDisplay = item.phone 
+                    ? `<div class="flex items-center text-sm text-gray-600 mt-1"><i class="fa-solid fa-phone mr-2 text-gray-400"></i> ${item.phone}</div>` 
+                    : '';
+
+                // NEW: Logic to display description
+                const descDisplay = item.description 
+                    ? `<p class="text-gray-500 text-sm mt-3 line-clamp-2 italic">"${item.description}"</p>` 
+                    : '';
+
+                grid.innerHTML += `
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition group fade-in">
+                        <div class="h-48 overflow-hidden relative">
+                            <span class="absolute top-3 left-3 ${badgeColor} px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide z-10">${item.type}</span>
+                            <img src="${imgUrl}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        </div>
+                        <div class="p-5">
+                            <h3 class="font-bold text-lg text-gray-900 leading-tight">${item.title}</h3>
+                            <div class="flex items-center text-sm text-gray-500 mt-2"><i class="fa-solid fa-location-dot mr-2 text-gray-400"></i> ${item.location}</div>
+                            ${phoneDisplay}
+                            ${descDisplay}
+                            
+                            <div class="flex justify-between items-center pt-4 border-t border-gray-100 mt-4">
+                                <span class="text-xs text-gray-400 font-medium">${item.userEmail ? item.userEmail.split('@')[0] : 'Anonymous'}</span>
+                                <a href="mailto:${item.userEmail}" class="text-sm font-semibold hover:bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg">Email <i class="fa-solid fa-envelope ml-1"></i></a>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        });
+
+        // --- SUBMIT LOGIC ---
+        window.handleFormSubmit = async (e) => {
+            e.preventDefault();
+            if (!currentUser) { alert("Please log in first."); return; }
+
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = `<span class="loader"></span> Saving...`;
+            submitBtn.disabled = true;
+
+            try {
+                await addDoc(itemsCollection, {
+                    type: window.currentModalType,
+                    title: document.getElementById('itemName').value,
+                    location: document.getElementById('itemLocation').value,
+                    category: document.getElementById('itemCategory').value,
+                    
+                    // NEW: CAPTURING PHONE AND DESCRIPTION
+                    phone: document.getElementById('itemPhone').value,
+                    description: document.getElementById('itemDescription').value,
+                    
+                    timestamp: serverTimestamp(),
+                    userEmail: currentUser.email,
+                    image: compressedImageString
+                });
+
+                window.closeModal();
+                alert("Success! Item posted.");
+            } catch (error) {
+                console.error(error);
+                alert("Error: " + error.message);
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                compressedImageString = '';
+                document.getElementById('uploadText').innerText = "Tap to take photo / upload";
+                document.getElementById('uploadIcon').className = "fa-solid fa-camera text-2xl text-gray-400 mb-2 group-hover:text-blue-500 transition";
+            }
+        };
+
+        // EXPOSED FUNCTIONS
+        window.openModal = (type) => { 
+            if(!currentUser) return alert("Please log in first.");
+            window.currentModalType = type; 
+            document.getElementById('submissionModal').classList.remove('hidden'); 
+        };
+        window.closeModal = () => { 
+            document.getElementById('submissionModal').classList.add('hidden'); 
+            document.getElementById('itemForm').reset();
+            compressedImageString = '';
+        };
+        window.filterItems = (type) => { currentFilter = type; location.reload(); };
+        window.searchItems = () => { };
+    </script>
+</body>
+</html>
