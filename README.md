@@ -58,24 +58,6 @@ CampusReclaim is a modern web-based Lost & Found platform designed for college c
 5. Reports are displayed in real time for all users.
 6. Owners and finders can connect using the provided contact information.
 
-## Installation
-
-1. Clone the repository:
-
-git clone https://github.com/your-username/CampusReclaim.git
-
-2. Open the project folder.
-
-3. Configure Firebase:
-
-   * Create a Firebase project.
-   * Enable Google Authentication.
-   * Enable Firestore Database.
-   * Replace the Firebase configuration in the code with your own credentials.
-
-4. Run the project:
-
-Simply open `index.html` in your browser or host it using GitHub Pages.
 
 ## Future Enhancements
 
@@ -92,4 +74,4 @@ This project is open-source and available under the MIT License.
 
 ## Author
 
-Developed by Deepu as a student-focused solution for managing lost and found items on campus.
+Developed by Deepikha as a student-focused solution for managing lost and found items on campus.
